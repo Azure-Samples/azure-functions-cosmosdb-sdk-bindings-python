@@ -18,7 +18,7 @@ urlFragment: cosmosdb-sdk-type-bindings-with-azure-functions
 
 This sample demonstrates how to use the Azure Functions Cosmos DB SDK-type bindings in Python. The supported SDK types includes CosmosClient, DatabaseProxy, and ContainerProxy.
 
-You can learn more about SDK-type bindings for Cosmos DB in the [SDK-type Bindings for Python Reference](https://learn.microsoft.com/en-us/azure/azure-functions/functions-reference-python?tabs=get-started%2Casgi%2Capplication-level&pivots=python-mode-decorators#sdk-type-bindings-preview).
+You can learn more about SDK-type bindings for Cosmos DB in the [SDK-type Bindings for Python Reference](https://learn.microsoft.com/en-us/azure/azure-functions/functions-reference-python?tabs=get-started%2Casgi%2Capplication-level&pivots=python-mode-decorators#sdk-type-bindings).
 
 ## Prerequisites
 
@@ -28,9 +28,11 @@ Before running the sample, you need the following:
    
 2. **Azure Functions Core Tools**: Install [Azure Functions Core Tools](https://learn.microsoft.com/en-us/azure/azure-functions/functions-run-local?tabs=windows%2Cisolated-process%2Cnode-v4%2Cpython-v2%2Chttp-trigger%2Ccontainer-apps&pivots=programming-language-python) to run and test functions locally.
 
-3. **Python 3.x**: Ensure [Python 3.9 or later](https://www.python.org/downloads/) is installed on your machine.
+3. **A Supported Version of Python**: Visit the [Supported Python versions page](https://learn.microsoft.com/en-us/azure/azure-functions/functions-reference-python?tabs=get-started%2Casgi%2Capplication-level&pivots=python-mode-decorators#supported-python-versions) to learn more. The Azure deployments use Python 3.14, which is currently a preview runtime in Azure Functions.
 
-4. **Azure Storage Account**: Create a [storage account via the Azure Portal](https://docs.microsoft.com/azure/storage/common/storage-account-overview) and get the connection string.
+4. **Azure Developer CLI**: Install the [Azure Developer CLI](https://learn.microsoft.com/en-us/azure/developer/azure-developer-cli/install-azd) to provision and deploy all three samples.
+
+5. **Azure Storage Account**: For local testing, create a [storage account](https://learn.microsoft.com/azure/storage/common/storage-account-overview) and get the connection string. The Azure Developer CLI deployment provisions its own storage account.
 
 ## Using SDK-type Bindings for Cosmos DB in an Azure Function App
 The code in the sample folder has already been updated to support use of SDK-type bindings for Cosmos DB. Let's walk through the changed files.
@@ -90,13 +92,43 @@ The cosmosdb_samples_databaseproxy directory shows the type defined as DatabaseP
 
 ### Deploying to Azure
 
-There are three main ways to deploy this to Azure:
+The repository contains one Azure Developer CLI project with three independently deployable services:
+
+| Service | Project directory |
+| --- | --- |
+| `cosmosclient` | `cosmosdb_samples_cosmosclient` |
+| `databaseproxy` | `cosmosdb_samples_databaseproxy` |
+| `containerproxy` | `cosmosdb_samples_containerproxy` |
+
+Sign in and deploy from the repository root:
+
+```shell
+azd auth login
+azd up
+```
+
+`azd up` provisions and deploys all three samples. Each sample runs in a separate Linux Flex Consumption Function App using the Python 3.14 preview runtime. The environment shares a resource group, serverless Azure Cosmos DB account, database, container, storage account, and Log Analytics workspace. Each Function App has its own FC1 plan, user-assigned managed identity, deployment package container, and Application Insights resource.
+
+The deployment uses managed identities for Azure Functions host storage, package storage, and Cosmos DB. Storage shared-key access and Cosmos DB local authentication are disabled.
+
+After the environment has been provisioned, deploy one sample without changing the others:
+
+```shell
+azd deploy cosmosclient
+azd deploy databaseproxy
+azd deploy containerproxy
+```
+
+Remove the environment and its resources when finished:
+
+```shell
+azd down
+```
+
+You can also deploy manually using either of these approaches:
 
 * [Deploy with the VS Code Azure Functions extension](https://docs.microsoft.com/en-us/azure/azure-functions/create-first-function-vs-code-python#publish-the-project-to-azure). 
 * [Deploy with the Azure CLI](https://docs.microsoft.com/en-us/azure/azure-functions/create-first-function-cli-python?tabs=azure-cli%2Cbash%2Cbrowser#create-supporting-azure-resources-for-your-function).
-* Deploy with the Azure Developer CLI: After [installing the `azd` tool](https://learn.microsoft.com/en-us/azure/developer/azure-developer-cli/install-azd?tabs=localinstall%2Cwindows%2Cbrew), run `azd up` in the root of the project. You can also run `azd pipeline config` to set up a CI/CD pipeline for deployment.
-
-All approaches will provision a Function App, Storage account (to store the code), and a Log Analytics workspace.
 
 ## Next Steps
-Visit the [SDK-type bindings in Python reference documentation](https://learn.microsoft.com/en-us/azure/azure-functions/functions-reference-python?tabs=get-started%2Casgi%2Capplication-level&pivots=python-mode-decorators#sdk-type-bindings-preview) to learn more about how to use SDK-type bindings in a Python Function App and the [API reference documentation](https://learn.microsoft.com/en-us/python/api/azure-cosmos/azure.cosmos?view=azure-python) to learn more about what you can do with the Azure Cosmos DB library.
+Visit the [SDK-type bindings in Python reference documentation](https://learn.microsoft.com/en-us/azure/azure-functions/functions-reference-python?tabs=get-started%2Casgi%2Capplication-level&pivots=python-mode-decorators#sdk-type-bindings) to learn more about how to use SDK-type bindings in a Python Function App and the [API reference documentation](https://learn.microsoft.com/en-us/python/api/azure-cosmos/azure.cosmos?view=azure-python) to learn more about what you can do with the Azure Cosmos DB library.

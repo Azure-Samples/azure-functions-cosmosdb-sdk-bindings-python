@@ -1,0 +1,22 @@
+name: cosmosdb-sdk-bindings-python
+metadata:
+  template: cosmosdb-sdk-bindings-python@0.0.1-beta
+infra:
+  provider: bicep
+  path: infra
+services:
+  cosmosclient:
+    project: ./cosmosdb_samples_cosmosclient
+    language: py
+    host: function
+    resourceName: ${COSMOSCLIENT_FUNCTION_APP_NAME}
+  databaseproxy:
+    project: ./cosmosdb_samples_databaseproxy
+    language: py
+    host: function
+    resourceName: ${DATABASEPROXY_FUNCTION_APP_NAME}
+  containerproxy:
+    project: ./cosmosdb_samples_containerproxy
+    language: py
+    host: function
+    resourceName: ${CONTAINERPROXY_FUNCTION_APP_NAME}
